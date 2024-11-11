@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -90,8 +91,27 @@ public class RestTemplateService {
         return responseEntity.getBody();
     }
 
+    // http의 header 부분에 데이터를 넣는 방법
     public List<ItemDto> exchangeCall(String token) {
-        return null;
+        // 요청 URL 만들기
+        URI uri = UriComponentsBuilder
+                .fromUriString("http://localhost:7070")
+                .path("/api/server/exchange-call")
+                .encode()
+                .build()
+                .toUri();
+        log.info("uri = " + uri);
+
+        User user = new User("Robbie", "1234");
+
+        RequestEntity<User> requestEntity = RequestEntity  // requestEntity에 uri, header, body 설정
+                .post(uri)
+                .header("X-Authorization", token)
+                .body(user);
+
+        ResponseEntity<String> responseEntity = restTemplate.exchange(requestEntity, String.class);
+
+        return fromJSONtoItems(responseEntity.getBody());
     }
 
 
